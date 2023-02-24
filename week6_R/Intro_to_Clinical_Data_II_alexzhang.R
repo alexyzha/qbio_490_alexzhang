@@ -13,6 +13,10 @@ if (!require("tidyr", quietly = TRUE))
   install.packages("tidyr") #install tidyr
 if (!require("survival", quietly = TRUE))
   install.packages("survival") #install survival
+if (!require("ggplot2", quietly = TRUE))
+  install.packages("ggplot2") #install ggplot2
+if (!require("survminer", quietly = TRUE))
+  install.packages("survminer") #install survminer
   
 library(BiocManager)
 library(TCGAbiolinks)
@@ -20,6 +24,8 @@ library(maftools)
 library(dplyr)
 library(tidyr)
 library(survival)
+library(ggplot2)
+library(survminer)
 #library to load all packages
 ##------------------------------------------------------------------------------------------------
 #setting directory
@@ -112,15 +118,59 @@ plot(mergedForPlot$numAGE, mergedForPlot$numDOSE, type = "h", main = "Age vs Tot
   KPfit2 <- survfit(Surv(mergedForCode$total_dose, mergedForCode$vital_status) ~1, data = mergedForCode)
   plot(KPfit2, xlab = "Total Dosage (mg)", ylab = "Relative Frequency of Survival", main = "Total Dosage and Relative Survival Frequency")
   
+#4
+#first Kap-Mei graph
+#first i merge and make new dataset mergeKP1 with 2 column, then i extract and make them all numeric. After that, i run survfit and surv_pvalue and ggplot2 and p_value <- geom_smooth. However, all of these give me null values for p_value so
+#im going to assume that the data is just not spread out in a meaningful way to calculate a regression line
+mergeKP1 <- inner_join(clinic, clinical_drug, by = "bcr_patient_barcode", multiple = "first") %>%
+  dplyr::select(days_to_birth, vital_status) %>%
+  extract(days_to_birth, into = "DTBkp")
+  #extract(vital_status, into = "VSkp") %>%
+  #dplyr::mutate(as.numeric(DTBkp)) 
+  #dplyr::mutate(as.numeric(VSkp))
+  mergeKP1$vital_status <- ifelse(mergeKP1$vital_status == "Alive", 1, 0)
+  mergeKP1$DTBkp <- as.numeric(mergeKP1$DTBkp)
+  #above code is all to extract data
+KPfit1q4 <- survfit(Surv(mergeKP1$DTBkp, mergeKP1$vital_status) ~1, data = mergeKP1)
+  surv_pvalue(KPfit1q4, data = mergeKP1, type = "log-rank")
+  surv_pvalue(KPfit1q4)$mergedForCode
+  #survfit and p_value above
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
+#ggplot2 for p_value below
+ggplot(data = mergeKP1, aes(x = DTBkp, y = vital_status))
+  geom_smooth(method = "lm", na.rm = "TRUE")
+# geom_histogram(binwidth = 10)
+  p_value <- geom_smooth()$coef[3]
+#print p_value
+  p_value
   
 
+#second Kap-Mei graph
+#i did the same thing with the first KM graph. Extract data, make new dataframe, make ggplot 2 to find p_value
+#keep getting null for both methods though so im going to assume again that the data is just not spread out in a meaningful way to calculate a regression line
+mergeKP2 <- inner_join(clinic, clinical_drug, by = "bcr_patient_barcode", multiple = "first") %>%
+  dplyr::select(total_dose, vital_status) %>%
+  extract(total_dose, into = "TDkp2")
+  #extract(vital_status, into = "VSkp2") %>%
+  #dplyr::mutate(as.numeric(DTBkp2)) 
+  #dplyr::mutate(as.numeric(VSkp2))
+  mergeKP2$vital_status <- ifelse(mergeKP2$vital_status == "Alive", 1, 0)
+  mergeKP2$TDkp2 <- as.numeric(mergeKP2$TDkp2)
+  #above code is to extract data
+KPfit2q4 <- survfit(Surv(mergeKP2$TDkp2, mergeKP2$vital_status) ~1, data = mergeKP2)
+  surv_pvalue(KPfit2q4, data = mergeKP2, type = "log-rank")
+  surv_pvalue(KPfit2q4)$mergedForCode
+  #above code is for survfit
+
+#ggplot2 p_value down below
+ggplot(data = mergeKP2, aes(x = TDkp2, y = vital_status))
+  geom_smooth(method = "lm", na.rm = "TRUE")
+  #  geom_histogram(binwidth = 10)
+  p_value <- geom_smooth()$coef[3]
+#print p_value  
+  p_value
+  
+##------------------------------------------------------------------------------------------------
+#end  
+
+  
