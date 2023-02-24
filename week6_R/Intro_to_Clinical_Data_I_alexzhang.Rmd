@@ -94,7 +94,10 @@ age_in_years_of_5th
 #50.331 years old
 
 #4
+install.packages("dplyr")
+install.packages("tidyr")
 library(dplyr)
+library(tidyr)
 patient1 <- read.csv('brca_clinical_data.csv') %>%
   dplyr::select(days_to_birth, days_to_last_followup) %>%
   extract(days_to_birth, into = "numYR") %>%
@@ -110,7 +113,7 @@ ageAtLV = (20211-3767)/365
 #age of patient at last visit is 45.05 years
 
 #couldn't remember how to do it the easy way until i read the next set of instructions :(
-  
+
 ```
 
 View the column and row names. What two commands should you use?
