@@ -16,7 +16,8 @@ As good general practice to keep things organized, create an "analysis_data" fol
 Once the folder is created, set your working directory below:
 
 ```{r setup}
-    knitr::opts_knit$set(root.dir = normalizePath('/Users/Aly/Desktop/Main/School_Files/S2/QBIO/qbio_490_alexzhang/analysis_data'))
+    knitr::opts_knit$set(root.dir = normalizePath("/Users/aly/Desktop/Main/School_Files/S2/QBIO/qbio_490_alexzhang/analysis_data"))
+getwd()
 ```
 
 Before you move on, go to your GitHub web browser, open your .gitignore, and make sure the following is added in. 
