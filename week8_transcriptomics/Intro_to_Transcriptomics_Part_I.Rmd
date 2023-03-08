@@ -24,9 +24,6 @@ Let's take a look at rna_se (RNA Summarized Experiment). Call head() and str(). 
 
 ```{r Exercise 1.1}
 # write code here
-rna_sePRE <- load("~/Desktop/Main/School_Files/S2/QBIO/qbio_490_alexzhang/analysis_data/rna_se.RData") #loading data
-rna_se <- as.data.frame(rna_sePRE) #loading data
-
 head(rna_se)
 str(rna_se)
 ```
@@ -41,6 +38,10 @@ Use the dim() function to find the dimensions of the colData, rowRanges, and uns
 # write code here
 
 dim(rna_se)
+dim(rna_se@colData)
+dim(rna_se@rowRanges@elementMetadata)
+dim(rna_se@assays@data$unstranded)
+
 ```
 
 Run the following code and fill out a description of the rows/columns of our data frames.You can use this as a cheat sheet moving forward.
@@ -56,13 +57,13 @@ Run the following code and fill out a description of the rows/columns of our dat
   
 ```{r Exercise 1.3}
 # colData: 
-rownames()
-colnames()
+rownames(rna_se@colData)
+colnames(rna_se@colData)
 
 # rowRanges:
-str()
+str(rna_se@rowRanges)
 # what are the rows... use your logic
-
+  #rows are patients
 # for unstranded, don't call anything, just use your logic from exercise 1.2 and and think it through!
 ```
 
@@ -72,6 +73,7 @@ View the first 15 values in the age_at_index column.
 
 ```{r Exercise 2.1}
 # write code here
+head(rna_se@colData$age_at_index, 15)
 ```
 
 Call summary on the age_at_index column. Record the output below:
@@ -85,14 +87,20 @@ Call summary on the age_at_index column. Record the output below:
     
 ```{r Exercise 2.2}
 # write code here
+summary(rna_se@colData$age_at_index)
 ```
 
 Create a data frame called rna_clinical that contains data from colData, except for the NA patient and their data.
 
 ```{r Exercise 2.3}
 #write code here
-rna_clinical <- rna_se@colData$age_at_index
 
+rna_clinical <- rna_se@colData[!is.na(rna_se@colData$age_at_index), ]
+
+#or
+
+no_mask <- !is.na(rna_se@colData$age_at_index)
+rna_clinical <- rna_se@colData[no_mask, ]
 ```
 
 Use the as.data.frame() function to change this from an S4 object to a data frame object.
@@ -105,7 +113,8 @@ rna_clinical <- as.data.frame(rna_clinical)
 Make a mask and subset out the treatments column.
 
 ```{r Exercise 2.5}
-treatments_mask <- ifelse(colnames(rna_clinical) != "treatments", T, F)
+treatments_mask <- ifelse(colnames(rna_clinical) == "treatments", F, T)
+
 rna_clinical <- rna_clinical[,treatments_mask]
 
 ```
@@ -113,7 +122,7 @@ rna_clinical <- rna_clinical[,treatments_mask]
 Save rna_clinical to your local machine
 
 ```{r Exercise 2.6}
-write.csv(rna_clinical, "/PATH/TO/FILE/brca_rna_clincial_data.csv", row.names = TRUE)
+write.csv(rna_clinical, "/Users/aly/Desktop/Main/School_Files/S2/QBIO/qbio_490_alexzhang/analysis_data/brca_rna_clincial_data.csv", row.names = TRUE)
 ```
 
 ###### (3) RowRanges
@@ -122,25 +131,25 @@ Call head() on rowRanges@elementMetadata:
 
 ```{r Exercise 3.1}
 # write code here
-head(rowRanges@elementMetadata)
+head(rna_se@rowRanges@elementMetadata)
 ```
 
 Create a data frame called rna_genes that contains data from elementMetadata.
 
 ```{r Exercise 3.2}
-rna_genes <- 
+rna_genes <- rna_se@rowRanges@elementMetadata
 ```
 
 Use the as.data.frame() function to change this from an S4 object to a data frame object
 
 ```{r Exercise 3.3}
-rna_genes <- as.data.frame(FILL IN HERE)
+rna_genes <- as.data.frame(rna_genes)
 ```
 
 Save rna_genes to your local machine.
 
 ```{r Exercise 3.4}
-write.csv(rna_genes, "/PATH/TO/FILE/brca_rna_gene_data.csv", row.names = FALSE)
+write.csv(rna_genes, "/Users/aly/Desktop/Main/School_Files/S2/QBIO/qbio_490_alexzhang/analysis_data/brca_rna_gene_data.csv", row.names = FALSE)
 ```
 
 ###### (4) Assays
@@ -155,7 +164,7 @@ rna_se@assays
 Create a new data frame called "rna_counts" that contains the data from unstranded. Recall the patient with NA age data? We need to exclude that patient. We can use the same mask to do this.
 
 ```{r Exercise 4.2}
-rna_counts <- rna_se@assays$unstranded[,!is.na(rna_se@colData$age_at_index)]
+rna_counts <- rna_se@assays@data$unstranded[,!is.na(rna_se@colData$age_at_index)]
 ```
 
 Fetch the data for the first 5 patients and the first 15 rows.
@@ -168,7 +177,7 @@ rna_counts[1:15, 1:5]
 Save rna_counts to your local machine (warning: this will likely take a while!)
 
 ```{r Exercise 4.4}
-write.csv(rna_counts, "/PATH/TO/FILE/brca_rna_count_data.csv", row.names = TRUE)
+write.csv(rna_counts, "/Users/aly/Desktop/Main/School_Files/S2/QBIO/qbio_490_alexzhang/analysis_data/brca_rna_count_data.csv", row.names = TRUE)
 ```
 
 
@@ -178,6 +187,8 @@ Call rownames() and colnames() on rna_clinical.
 
 ```{r Exercise 5.1}
 # write code here
+rownames(rna_clinical)
+colnames(rna_clinical)
 ```
 
 As you can see, the column names are informative, but the row names are not. Let's fix this. Use the row.names() function to name the rows according to the barcode column.
@@ -186,6 +197,7 @@ As you can see, the column names are informative, but the row names are not. Let
 ?row.names
 
 # add row names here
+row.names(rna_clinical)
 ```
 
 Just like we did to "clinical", we are going to create a column in rna_clinical for age_category. Our cutoff will be the same ("young" as <= 58 y/o, and "old" as > 58 y/o).
@@ -195,6 +207,12 @@ There are three age columns in rna_clinical. Which one should we use? Explore th
 ```{r Exercise 5.3}
 # write code here
 
+summary(rna_clinical$age_at_diagnosis)
+summary(rna_clinical$age_at_index)
+summary(rna_clinical$paper_age_at_initial_pathologic_diagnosis)
+
+rna_clinical$age
+
 # Hint: if you're really stuck finding the columns/determining which to use, go to the bottom of the "Cleaning up your data frames" section for the answers. Only do this once you've given it a good shot on your own!
 ```
 
@@ -202,6 +220,7 @@ Now that you have your existing data column. Use this with an ifelse() statement
 
 ```{r Exercise 5.4}
 # write code here
+rna_se$age_category <- ifelse(rna_clinical$age_at_index <= 58, "young", "old")
 ```
 
 ----
@@ -210,12 +229,17 @@ Let's move on to rna_genes. Call rownames() and colnames() on rna_genes.
 
 ```{r Exercise 5.5}
 # write code here
+
+rownames(rna_genes)
+colnames(rna_genes)
 ```
 
 Once again, the column names are informative, but the row names are not. Use row.names() to name the rows according to gene_id. Note: it would be nice to use gene_name instead of gene_id for the row names, but there are duplicate values in the gene_name column, and row names must be unique.
 
 ```{r Exercise 5.6}
 # write code here
+
+rownames(rna_genes) <- rna_genes$gene_id
 ```
 
 ----
@@ -224,12 +248,18 @@ Now that rna_genes has informative row/column names, let's move on to rna_counts
 
 ```{r Exercise 5.7}
 # write code here
+
+rownames(rna_counts)
+colnames(rna_counts)
 ```
 
 Uh oh! Looks like neither the row nor column names are very informative. Given what we did to the other data frames, add column and row names to rna_counts. Name the columns based on the patient barcodes (ie the column names for rna_clinical), and name the rows based on the gene id's (ie the column names for rna_gene).
 
 ```{r Exercise 5.8}
 # write code here
+rownames(rna_counts) <- rownames(rna_genes)
+colnames(rna_counts) <- rownames(rna_clinical)
+head(rna_counts)
 ```
 
 ----
@@ -238,6 +268,7 @@ The last step in cleanup is to subset out any samples that are of a normal tissu
 
 ```{r Exercise 5.9}
 # write code here
+unique(rna_clinical$definition)
 ```
 
 Notice that there are three sample types: "Solid Tissue Normal", "Primary solid Tumor", and "Metastatic". For now, we are simply going to get rid of the "Solid Tissue Normal" samples, but keep this in mind for your midterm and final projects as these samples could provide you with a good control!
@@ -246,12 +277,18 @@ Create a mask that calls "Solid Tissue Normal" FALSE, and the other two sample t
 
 ```{r Exercise 5.10}
 # write code here
+
+tissue_mask <- ifelse(colnames(rna_clinical$definition) == "Solid Tissue Normal", F, T)
+
+rna_clinical$tissue_category <- rna_clinical$definition[,tissue_mask]
+
 ```
 
 You will need to apply this mask to two of our three data frames (rna_clinical, rna_genes, rna_counts). Think about which df's involve samples, and apply the mask to these data frames to subset out the normal samples. You may overwrite the data frames in this case.
 
 ```{r Exercise 5.11}
 # write code here
+rna_clinical$tissue_category <- rna_clinical$definition[tissue_mask]
 ```
 
 Great! Now all of our data frames are ready for exploration and analysis.
@@ -270,14 +307,14 @@ Make a column in rna_clinical called five_yr_surv that contains TRUEs and FALSEs
 ```{r Exercise 6.1}
 # fill in the nested ifelse to capture TRUE/FALSE values for whether a patient survived 5 years according to their days_to_death (NOTE: the first ifelse condition changes the NAs from next to true NA values so we can use is.na() later on)
 
-five_yr_death <- ifelse(rna_clinical$days_to_death == "NA", NA, ifelse(FILL IN HERE))
+five_yr_death <- ifelse(rna_clinical$days_to_death == "NA", NA, ifelse(rna_clinical$days_to_death > 1826.25, T, F))
 
 # use boolean data from days_to_last_followup when five_yr_death is NA
 
-five_yr_death_and_followup <- ifelse(is.na(five_yr_death), ifelse(FILL IN HERE), five_yr_death)
+five_yr_death_and_followup <- ifelse(is.na(five_yr_death), ifelse(rna_clinical$days_to_birth == "NA", NA), five_yr_death)
 
 # create your column from your finalized boolean vector (there should be only T/F, no NAs) 
-rna_clinical$five_year_surv <- FILL IN HERE
+rna_clinical$five_year_surv <- five_yr_death[five_yr_death_and_followup]
 ```
 
 ----
@@ -291,14 +328,15 @@ fruit_list <- c("peach", "pomegranate", "cherry", "apricot", "kiwi")
 ```
 
 Using your knowledge from the literature presentations, Google, etc., pick two genes that are important in breast cancer. List them below.
-    ~ Gene 1: 
-    ~ Gene 2:
+    ~ Gene 1: GATA3
+    ~ Gene 2: BAD
     
 Using the %in% function, check that these two genes are in the rna_genes data. If they aren't pick a new gene. Hint: think about which column to check in.
 
 ```{r Exercise 6.3}
 # write code here
-```
+rna_genes$gene_name %in%("GATA3")
+rna_genes$gene_name %in%("BAD")
 
 Create a mask for geneA and geneB where that gene is TRUE and all others are FALSE.
 
@@ -307,47 +345,51 @@ NOTE: for the rest of this notebook, whenever you see "geneA" or "geneB", change
 ```{r Exercise 6.4}
 # write code here
 
-geneA_mask <- FILL IN HERE # create mask based on the gene name (your mask should be true when the name is 'geneA' and false for any other gene name)
+GATA3_mask <- ifelse(rna_genes$gene_name == "GATA3", T, F) # create mask based on the gene name (your mask should be true when the name is 'geneA' and false for any other gene name)
 
-geneB_mask <- FILL IN HERE
+BAD_mask <- ifelse(rna_genes$gene_name == "BAD", T, F)
 ```
 
 We can use this mask for a few things. First, let's use it to grab the ensembl IDs of our genes.
 
 ```{r Exercise 6.5}
-geneA_ensembl <- FILL IN HERE # think about which column we should apply out mask to
+GATA3_ensembl <- ifelse(rna_genes$gene_id %in% row.names(result)) # think about which column we should apply out mask to
   
-geneB_ensembl <- FILL IN HERE
+BAD_ensembl <- ifelse(rna_genes$gene_id %in% row.names(result))
 ```
 
 We can also use the mask to create a list that contains counts for just a single gene. (HINT: this means subsetting for just the geneA row, with all columns included)
 
 ```{r Exercise 6.6}
-geneA_counts <- FILL IN HERE
+GATA3_subset <- subset(rna_genes, genes = 'GATA3')
+GATA3_counts <- as.list(GATA3_subset[,-1])
 
-geneB_counts <- FILL IN HERE
+BAD_subset <- subset(rna_genes, genes = 'BAD')
+BAD_counts <- as.list(BAD_subset[,-1])
 ```
 
 Call summary() on geneA_counts and geneB_counts. Record the output below:
 
   Gene A
-    ~ Min.:
-    ~ 1st Qu.:
-    ~ Median:
-    ~ Mean:
-    ~ 3rd Qu.:
-    ~ Max.:
+    ~ Min.: NA
+    ~ 1st Qu.: NA
+    ~ Median: NA
+    ~ Mean: NA
+    ~ 3rd Qu.: NA
+    ~ Max.: NA
     
   Gene B
-  ~ Min.:
-  ~ 1st Qu.:
-  ~ Median:
-  ~ Mean:
-  ~ 3rd Qu.:
-  ~ Max.:
+  ~ Min.: NA
+  ~ 1st Qu.: NA
+  ~ Median: NA
+  ~ Mean: NA
+  ~ 3rd Qu.: NA
+  ~ Max.: NA
 
 ```{r Exercise 6.7}
 # write code here
+summary(GATA3_counts)
+summary(BAD_counts)
 ```
 
 ###### (7) Plotting
@@ -356,11 +398,11 @@ Recall that plot() creates a scatterplot. Use this function to plot geneA vs gen
 
 ```{r Exercise 7.1}
 par(mar=c(1,1,1,1)) # this changes your margins so the plot will appear in the window correctly
-plot(geneA_counts,
-     geneB_counts,
-     xlab = "x axis label",
-     ylab = "y axis label",
-     main = "plot title"
+plot(GATA3_counts,
+     BAD_counts,
+     xlab = "GATA3 Gene",
+     ylab = "BAD Gene",
+     main = "GATA3 vs BAD"
 )
 ```
 
@@ -371,12 +413,12 @@ Do you notice any patterns? Is there a relationship between the two genes that y
 Let's visualize these two genes again, this time using box plots. To get both geneA_counts and geneB_counts on one plot, make a data frame using data.frame() that contains those lists as columns.
 
 ```{r Exercise 7.2}
-geneAB_counts <- FILL IN HERE # create data frame with geneA_counts and geneB_counts
+geneAB_counts <- data.frame(GATA3_counts, BAD_counts) # create data frame with geneA_counts and geneB_counts
 
 par(mar=c(1,1,1,1))
-boxplot(geneAB_counts,
-        xlab = "x axis label",
-        ylab = "y axis label")
+boxplot(as.numeric(geneAB_counts),
+        xlab = "GATA3 Gene",
+        ylab = "BAD Gene")
 ```
 
 Write a few sentence making observations about your plot, noting the significance of what this means, and any key takeaways:
@@ -387,9 +429,9 @@ For the next plots, choose either gene A or gene B to continue with. We will be 
 
 ```{r Exercise 7.3}
 par(mar=c(1,1,1,1))
-boxplot(y_axis_data ~ x_axis_data, # think about what data (gene counts or the 5 yr survival column) should be on the x vs y axes
-        xlab = "x axis label",
-        ylab = "y axis label")
+boxplot(five_year_surv ~ GATA3_counts, # think about what data (gene counts or the 5 yr survival column) should be on the x vs y axes
+        xlab = "GATA3 Count",
+        ylab = "Survival")
 dev.off()
 ```
 
@@ -400,22 +442,25 @@ Does there appear to be a relationship between expression of your gene and five 
 Create two more gene_count lists, for MKI67 and PTGS2.
 
 ```{r Exercise 7.4}
-MKI67_counts <- FILL IN HERE
-PTGS2_counts <- FILL IN HERE
+MKI67_subset <- subset(rna_genes, genes = 'MKI67')
+MKI67_counts <- as.list(MKI67_subset[,-1])
+
+PTGS2_counts <- subset(rna_genes, genes = 'PTGS2')
+PTGS2_counts <- as.list(PTGS2_subset[,-1])
 ```
 
 Create a Draftsman plot by filling in the code below.
 
 ```{r Exercise 7.5}
 # fill in with your 4 individual gene count lists and their names
-geneABCD_counts <- data.frame(FILL IN HERE)
-colnames(geneABCD_counts) <- c(FILL IN HERE)
+geneABCD_counts <- data.frame(GATA3_counts, BAD_counts, MKI67_counts, PTGS2_counts)
+colnames(geneABCD_counts) <- c(GATA3_counts, BAD_counts, MKI67_counts, PTGS2_counts)
 
 # the following three lines set up a clustering color scheme for our plot
 # choose a column from rna_clinical to cluster based on (ex: age_category, five_yr_surv, AJCC staging, etc.)
-cols <- character(nrow(rna_clinical)) 
-cols[rna_clinical$COLUMN == VALUE] <- "blue" # fill in column and value for as many unique values are in your column (ex: 2 for age_category, "young"/"old")
-cols[rna_clinical$COLUMN == VALUE] <- "red"
+cols <- character(nrow(five_yr_surv)) 
+cols[rna_clinical$COLUMN == TRUE] <- "blue" # fill in column and value for as many unique values are in your column (ex: 2 for age_category, "young"/"old")
+cols[rna_clinical$COLUMN == FALSE] <- "red"
 
 # run this line to create your plot!
 pairs(geneABCD_counts, col = cols, lower.panel=NULL)
@@ -429,4 +474,5 @@ Write your df files to your local computer (you may overwrite the existing files
 
 ```{r Exercise 8.1}
 # save files here
+# i saved the dataframes before
 ```
