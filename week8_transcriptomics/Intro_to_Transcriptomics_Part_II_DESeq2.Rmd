@@ -114,7 +114,7 @@ To break down what analysis actually takes place within the DESeq2 pipeline:
 ```{r}
 ?DESeqDataSetFromMatrix
 dds <- DESeqDataSetFromMatrix(countData = rna_counts,
-                             colData = rna_genes,
+                             colData = rna_clinical,
                              design = ~covar1 + covar2 + condition)
 
 ?DESeq

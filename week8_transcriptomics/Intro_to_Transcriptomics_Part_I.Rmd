@@ -288,7 +288,7 @@ You will need to apply this mask to two of our three data frames (rna_clinical, 
 
 ```{r Exercise 5.11}
 # write code here
-rna_clinical$tissue_category <- rna_clinical$definition[tissue_mask]
+
 ```
 
 Great! Now all of our data frames are ready for exploration and analysis.
